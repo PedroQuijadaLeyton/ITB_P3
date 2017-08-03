@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour {
     public Sprite[] images_therapy;
     int images_therapy_index = 0;
     ImageManager current_imagen;
+    Astronauta astronauta;
+
+    bool is_result_good = false;
 
     public GameObject temp_correct;
     public GameObject temp_incorrect;
@@ -20,7 +23,8 @@ public class GameManager : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        InvokeRepeating("spawn_image", 0, time_to_spawn_and_death_time);
+        astronauta = FindObjectOfType<Astronauta>();
+        spawn_image();
 	}
 	
 	// Update is called once per frame
@@ -35,13 +39,15 @@ public class GameManager : MonoBehaviour {
 
     public void show_recording_panel()
     {
-        recording.SetActive(true);
+        astronauta.toggle_recording();
     }
 
-    public void show_analyzing_panel(ImageManager im)
+    public void show_analyzing_panel(ImageManager im, bool result)
     {
+        is_result_good = result;
         current_imagen = im;
-        recording.SetActive(false);
+        //recording.SetActive(false);
+        astronauta.toggle_iddle();
         analyzing.SetActive(true);
         StartCoroutine(wait_for_sec_to_disable_analyzing());
     }
@@ -51,17 +57,20 @@ public class GameManager : MonoBehaviour {
         yield return new WaitForSeconds(2);
         analyzing.SetActive(false);
         current_imagen.set_result();
+        if(is_result_good)
+                astronauta.toggle_win();
     }
 
-    void spawn_image()
+    public void spawn_image()
     {
         GameObject image_reference = Instantiate(image);
         image_reference.transform.position = spawning_point.position;
-        image_reference.GetComponent<ImageManager>().init(images_therapy[images_therapy_index], time_to_spawn_and_death_time, 2);
+        image_reference.GetComponent<ImageManager>().init(images_therapy[images_therapy_index], 1f);
         images_therapy_index++;
 
         if (images_therapy_index == (images_therapy.Length - 1))
             images_therapy_index = 0;
 
     }
+
 }
