@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Assets\Script\GameManager.cs" />
     <Compile Include="Assets\Script\ImageManager.cs" />
+    <Compile Include="Assets\Script\wav.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
