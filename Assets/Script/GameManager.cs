@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour {
     int images_therapy_index = 0;
     ImageManager current_imagen;
     Astronauta astronauta;
+    public GameObject well_done;
 
     bool is_result_good = false;
 
@@ -47,7 +48,7 @@ public class GameManager : MonoBehaviour {
         is_result_good = result;
         current_imagen = im;
         //recording.SetActive(false);
-        astronauta.toggle_iddle();
+        astronauta.toggle_procesing();
         analyzing.SetActive(true);
         StartCoroutine(wait_for_sec_to_disable_analyzing());
     }
@@ -56,9 +57,13 @@ public class GameManager : MonoBehaviour {
     {
         yield return new WaitForSeconds(2);
         analyzing.SetActive(false);
+        astronauta.toggle_iddle();
         current_imagen.set_result();
         if(is_result_good)
-                astronauta.toggle_win();
+        {
+            astronauta.toggle_win();
+            StartCoroutine(wait_for_sec_to_disable_well_done_message());
+        }
     }
 
     public void spawn_image()
@@ -72,5 +77,23 @@ public class GameManager : MonoBehaviour {
             images_therapy_index = 0;
 
     }
+
+    IEnumerator wait_for_sec_to_disable_well_done_message()
+    {
+        well_done.SetActive(true);
+        yield return new WaitForSeconds(2);
+        well_done.SetActive(false);
+    }
+
+    public void is_correct_button()
+    {
+        FindObjectOfType<ImageManager>().is_correct_button();
+    }
+
+    public void is_wrong_button()
+    {
+        FindObjectOfType<ImageManager>().is_wrong_button();
+    }
+
 
 }
