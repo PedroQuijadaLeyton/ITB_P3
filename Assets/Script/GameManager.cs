@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
     
@@ -21,12 +22,25 @@ public class GameManager : MonoBehaviour {
     public GameObject temp_correct;
     public GameObject temp_incorrect;
 
+    public GameObject bonus_x2;
+    public GameObject bonus_time;
+    public GameObject alien_1;
+
+    public Image current_bag_fill;
+    public Text current_bag_value_text;
+    public int bag_index = 1;
+    int score_bag_value = 0;
+
     // Use this for initialization
     void Start ()
     {
         astronauta = FindObjectOfType<Astronauta>();
         spawn_image();
-	}
+        //SPAWN BONUS
+        InvokeRepeating("spawn_bonus_time", 2, 22);
+        InvokeRepeating("spawn_bonus_x2", 6, 22);
+        InvokeRepeating("spawn_alien_1", 13, 22);
+    }
 	
 	// Update is called once per frame
 	void Update ()
@@ -61,7 +75,21 @@ public class GameManager : MonoBehaviour {
         current_imagen.set_result();
         if(is_result_good)
         {
-            astronauta.toggle_win();
+            //VISUAL
+            bag_index++;
+            if (bag_index == 4)
+            {
+                bag_index = 0;
+                current_bag_fill.fillAmount = 0;
+                //LEVEL SCORE DISLAYED IN BAG - once full we count 
+                score_bag_value++;
+                current_bag_value_text.text = string.Concat("x ", score_bag_value.ToString());
+            }
+
+            current_bag_fill.fillAmount = 0.2f * bag_index;
+            astronauta.toggle_win_and_update_bag(bag_index);
+
+
             StartCoroutine(wait_for_sec_to_disable_well_done_message());
         }
     }
@@ -95,5 +123,19 @@ public class GameManager : MonoBehaviour {
         FindObjectOfType<ImageManager>().is_wrong_button();
     }
 
+    public void spawn_bonus_x2()
+    {
+        Instantiate(bonus_x2);
+    }
+
+    public void spawn_bonus_time()
+    {
+        Instantiate(bonus_time);
+    }
+
+    public void spawn_alien_1()
+    {
+        Instantiate(alien_1);
+    }
 
 }
