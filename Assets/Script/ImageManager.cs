@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ImageManager : MonoBehaviour {
-
-    float speed;
+    
+    float movement_speed = 100.0f;
     GameManager gm;
     bool triggered_start = false;
     bool triggered_end = false;
     bool is_result_good = false;
     bool is_moving = true;
 
-    // Use this for initialization
-    void Start()
+
+    public void init(Sprite current_image, string image_name, GameManager gm)
     {
-        gm = FindObjectOfType<GameManager>();
-        //set incorrect by default - image pass by
+        GetComponentInChildren<SpriteRenderer>().sprite = current_image;
+        name = image_name;
+        this.gm = gm;
+        //set incorrect by default - image pass by --DEBUG
         gm.temp_correct.SetActive(is_result_good);
         gm.temp_incorrect.SetActive(!is_result_good);
-        GetComponent<Rigidbody2D>().AddForce(Vector2.left * 100, ForceMode2D.Force);
-
+        //set incorrect by default - image pass by --DEBUG
+        GetComponent<Rigidbody2D>().AddForce(Vector2.left * movement_speed, ForceMode2D.Force);
     }
 
     // Update is called once per frame
@@ -44,38 +46,32 @@ public class ImageManager : MonoBehaviour {
         //    gm.temp_incorrect.SetActive(!is_result_good);
         //}
 #endif
-
+        //DELETE IMAGE AND START THE OTHER - ANIMATION MAKE THE IMAGE SCALE = 0
         if(transform.GetChild(0).lossyScale.x == 0)
         {
-            gm.spawn_image();
+            gm.spawn_image_instance();
             Destroy(gameObject);
         }
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == "start" && !triggered_start)
+        if (other.tag == "start" && !triggered_start) //WHEN IT STARTS RECORDING
         {
             triggered_start = true;
             gm.show_recording_panel();
         }
-        else if (!triggered_end)
+        else if (!triggered_end) //ANALAZING PANEL
         {
             stop_object();
             triggered_end = true;
             gm.show_analyzing_panel(this, is_result_good);
         }
-        else if(other.tag == "destroy")
+        else if(other.tag == "destroy") //IMAGE IS DESTROYED AT THE END IF THE RESULT IS WRONG
         {
-            gm.spawn_image();
+            gm.spawn_image_instance();
             Destroy(gameObject);
         }
-    }
-
-    public void init(Sprite current_image, float speed_temp)
-    {
-        GetComponentInChildren<SpriteRenderer>().sprite = current_image;
-        speed = speed_temp;
     }
 
     public void set_result()
@@ -84,12 +80,12 @@ public class ImageManager : MonoBehaviour {
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
         if(is_result_good)
         {
-            GetComponent<Rigidbody2D>().AddForce(Vector2.left * 100, ForceMode2D.Force);
+            GetComponent<Rigidbody2D>().AddForce(Vector2.left * movement_speed, ForceMode2D.Force);
             GetComponent<CircleCollider2D>().isTrigger = true;
         }
         else
         {
-            GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, 0.3f) * 200, ForceMode2D.Force);
+            GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, 0.3f) * (movement_speed + 100), ForceMode2D.Force);
         }
     }
 

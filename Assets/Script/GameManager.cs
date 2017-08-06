@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
     
+    ImageManager current_imagen;
+    Astronauta astronauta;
+    TherapyManager therapy_manager;
+
     public GameObject recording;
     public GameObject analyzing;
     public GameObject image;
@@ -12,22 +16,47 @@ public class GameManager : MonoBehaviour {
     float time_to_spawn_and_death_time = 12f;
     public Sprite[] images_therapy;
     int images_therapy_index = 0;
-    ImageManager current_imagen;
-    Astronauta astronauta;
     public GameObject well_done;
 
     bool is_result_good = false;
 
     public GameObject temp_correct;
     public GameObject temp_incorrect;
+    int current_level = 0;
+    
+    List<ImageStruc> therapy_images_to_go = new List<ImageStruc>();
+    List<ImageStruc> therapy_images_done = new List<ImageStruc>();
+    public GameObject image_struc;
+    public Transform image_struc_container;
 
     // Use this for initialization
     void Start ()
     {
         astronauta = FindObjectOfType<Astronauta>();
-        spawn_image();
+        therapy_manager = GetComponent<TherapyManager>();
+        set_up_level();
+        spawn_image_instance();
 	}
 	
+    void set_up_level()
+    {
+        foreach(TherapyManager.Therapy_images current_image in therapy_manager.therapy_images)
+        {
+            if(current_image.get_level() == current_level)
+            {
+                for(int difficulty = 0; difficulty < 3; difficulty++)
+                {
+                    GameObject temp = Instantiate(image_struc);
+                    temp.transform.SetParent(image_struc_container);
+                    temp.GetComponent<ImageStruc>().image_instance = new ImageStruc.Image_instance(current_image.get_image_name(), current_level, difficulty, 0);
+                    therapy_images_to_go.Add(temp.GetComponent<ImageStruc>());
+                    Debug.Log(current_image.get_image_name()+" / " +current_level +" , " +difficulty);
+                }
+            }
+        }
+
+    }
+
 	// Update is called once per frame
 	void Update ()
     {
@@ -66,15 +95,20 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void spawn_image()
+    public void spawn_image_instance()
     {
+        Debug.Log(therapy_images_to_go[0].image_instance.get_image_name());
         GameObject image_reference = Instantiate(image);
         image_reference.transform.position = spawning_point.position;
-        image_reference.GetComponent<ImageManager>().init(images_therapy[images_therapy_index], 1f);
-        images_therapy_index++;
+        image_reference.GetComponent<ImageManager>().init(Resources.Load(therapy_images_to_go[0].image_instance.get_image_name(), typeof(Sprite)) as Sprite , string.Concat(therapy_images_to_go[0].image_instance.get_image_name(), ".", therapy_images_to_go[0].image_instance.get_difficulty().ToString()), this);
+        //Debug.Log(therapy_images_to_go[0].image_instance.get_image_name() as Sprite);
+        //ERASE
+        //therapy_images_to_go.Add(therapy_images_to_go[0]);
+        therapy_images_to_go.Remove(therapy_images_to_go[0]);
+        //ERASE
 
-        if (images_therapy_index == (images_therapy.Length - 1))
-            images_therapy_index = 0;
+        //if (images_therapy_index == (images_therapy.Length - 1))
+        //    images_therapy_index = 0;
 
     }
 
