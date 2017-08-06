@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour {
     int images_therapy_index = 0;
     public GameObject well_done;
 
-    bool is_result_good = false;
+   // bool is_result_good = false;
 
     public GameObject temp_correct;
     public GameObject temp_incorrect;
@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour {
     List<ImageStruc> therapy_images_done = new List<ImageStruc>();
     public GameObject image_struc;
     public Transform image_struc_container;
+
+    public bool image_therapy_result = false;
 
     // Use this for initialization
     void Start ()
@@ -50,7 +52,7 @@ public class GameManager : MonoBehaviour {
                     temp.transform.SetParent(image_struc_container);
                     temp.GetComponent<ImageStruc>().image_instance = new ImageStruc.Image_instance(current_image.get_image_name(), current_level, difficulty, 0);
                     therapy_images_to_go.Add(temp.GetComponent<ImageStruc>());
-                    Debug.Log(current_image.get_image_name()+" / " +current_level +" , " +difficulty);
+                    //Debug.Log(current_image.get_image_name()+" / " +current_level +" , " +difficulty);
                 }
             }
         }
@@ -66,15 +68,19 @@ public class GameManager : MonoBehaviour {
         
 
     }
+    
+    public void toggle_question()
+    {
+        astronauta.toggle_question();
+    }
 
     public void show_recording_panel()
     {
         astronauta.toggle_recording();
     }
 
-    public void show_analyzing_panel(ImageManager im, bool result)
+    public void show_analyzing_panel(ImageManager im)
     {
-        is_result_good = result;
         current_imagen = im;
         //recording.SetActive(false);
         astronauta.toggle_procesing();
@@ -87,11 +93,21 @@ public class GameManager : MonoBehaviour {
         yield return new WaitForSeconds(2);
         analyzing.SetActive(false);
         astronauta.toggle_iddle();
-        current_imagen.set_result();
-        if(is_result_good)
+        //SEND IMAGE RESPONSE OF RESULT
+        current_imagen.set_result(image_therapy_result);
+        if(image_therapy_result) //IF CORRECT
         {
-            astronauta.toggle_win();
+            astronauta.toggle_win_and_update_bag();
             StartCoroutine(wait_for_sec_to_disable_well_done_message());
+            //delete from list of iamges to go and add it to the list of images done
+            therapy_images_done.Add(therapy_images_to_go[0]);
+            therapy_images_to_go.Remove(therapy_images_to_go[0]);
+        }
+        else
+        {
+            //if incorrect, add to the end of the list
+            therapy_images_to_go.Add(therapy_images_to_go[0]);
+            therapy_images_to_go.Remove(therapy_images_to_go[0]);
         }
     }
 
@@ -100,11 +116,18 @@ public class GameManager : MonoBehaviour {
         Debug.Log(therapy_images_to_go[0].image_instance.get_image_name());
         GameObject image_reference = Instantiate(image);
         image_reference.transform.position = spawning_point.position;
+
+        image_therapy_result = false;
+        //set incorrect by default - image pass by --DEBUG
+        temp_correct.SetActive(image_therapy_result);
+        temp_incorrect.SetActive(!image_therapy_result);
+        //set incorrect by default - image pass by --DEBUG
+
         image_reference.GetComponent<ImageManager>().init(Resources.Load(therapy_images_to_go[0].image_instance.get_image_name(), typeof(Sprite)) as Sprite , string.Concat(therapy_images_to_go[0].image_instance.get_image_name(), ".", therapy_images_to_go[0].image_instance.get_difficulty().ToString()), this);
         //Debug.Log(therapy_images_to_go[0].image_instance.get_image_name() as Sprite);
         //ERASE
         //therapy_images_to_go.Add(therapy_images_to_go[0]);
-        therapy_images_to_go.Remove(therapy_images_to_go[0]);
+        
         //ERASE
 
         //if (images_therapy_index == (images_therapy.Length - 1))
@@ -118,16 +141,19 @@ public class GameManager : MonoBehaviour {
         yield return new WaitForSeconds(2);
         well_done.SetActive(false);
     }
-
+    
     public void is_correct_button()
     {
-        FindObjectOfType<ImageManager>().is_correct_button();
+        image_therapy_result = true;
+        temp_correct.SetActive(image_therapy_result);
+        temp_incorrect.SetActive(!image_therapy_result);
     }
 
     public void is_wrong_button()
     {
-        FindObjectOfType<ImageManager>().is_wrong_button();
+        image_therapy_result = false;
+        temp_correct.SetActive(image_therapy_result);
+        temp_incorrect.SetActive(!image_therapy_result);
     }
-
 
 }

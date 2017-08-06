@@ -29,15 +29,13 @@ public class Astronauta : MonoBehaviour {
 		
 	}
 
-    public void toggle_recording()
+    public void toggle_question()
     {
         alert_image.SetActive(true);
-        StartCoroutine(toggle_off_alert_image());
     }
 
-    IEnumerator toggle_off_alert_image()
+    public void toggle_recording()
     {
-        yield return new WaitForSeconds(1.0f);
         GetComponent<SpriteRenderer>().sprite = astronauta_recording;
         alert_image.SetActive(false);
         record_image.SetActive(true);
@@ -60,9 +58,9 @@ public class Astronauta : MonoBehaviour {
         GetComponent<SpriteRenderer>().sprite = astronauta_iddle;
     }
 
-    public void toggle_win_and_update_bag(int index)
+    public void toggle_win_and_update_bag()
     {
-        bag.sprite = bag_level[index];
+        //bag.sprite = bag_level[index];
 
         GetComponent<SpriteRenderer>().sprite = astronauta_win;
         score_image.SetActive(true);

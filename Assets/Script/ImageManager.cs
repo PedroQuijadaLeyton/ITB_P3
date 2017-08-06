@@ -6,9 +6,6 @@ public class ImageManager : MonoBehaviour {
     
     float movement_speed = 100.0f;
     GameManager gm;
-    bool triggered_start = false;
-    bool triggered_end = false;
-    bool is_result_good = false;
     bool is_moving = true;
 
 
@@ -17,10 +14,6 @@ public class ImageManager : MonoBehaviour {
         GetComponentInChildren<SpriteRenderer>().sprite = current_image;
         name = image_name;
         this.gm = gm;
-        //set incorrect by default - image pass by --DEBUG
-        gm.temp_correct.SetActive(is_result_good);
-        gm.temp_incorrect.SetActive(!is_result_good);
-        //set incorrect by default - image pass by --DEBUG
         GetComponent<Rigidbody2D>().AddForce(Vector2.left * movement_speed, ForceMode2D.Force);
     }
 
@@ -56,16 +49,18 @@ public class ImageManager : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == "start" && !triggered_start) //WHEN IT STARTS RECORDING
+        if (other.tag == "question") //WHEN IT STARTS RECORDING
         {
-            triggered_start = true;
+            gm.toggle_question();
+        }
+        else if (other.tag == "start") //WHEN IT STARTS RECORDING
+        {
             gm.show_recording_panel();
         }
-        else if (!triggered_end) //ANALAZING PANEL
+        else if (other.tag == "end") //ANALAZING PANEL
         {
             stop_object();
-            triggered_end = true;
-            gm.show_analyzing_panel(this, is_result_good);
+            gm.show_analyzing_panel(this);
         }
         else if(other.tag == "destroy") //IMAGE IS DESTROYED AT THE END IF THE RESULT IS WRONG
         {
@@ -74,11 +69,11 @@ public class ImageManager : MonoBehaviour {
         }
     }
 
-    public void set_result()
+    public void set_result(bool result)
     {
-        GetComponentInChildren<Animator>().SetBool("good", is_result_good);
+        GetComponentInChildren<Animator>().SetBool("good", result);
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
-        if(is_result_good)
+        if(result)
         {
             GetComponent<Rigidbody2D>().AddForce(Vector2.left * movement_speed, ForceMode2D.Force);
             GetComponent<CircleCollider2D>().isTrigger = true;
@@ -92,19 +87,5 @@ public class ImageManager : MonoBehaviour {
     public void stop_object()
     {
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
-    }
-
-    public void is_correct_button()
-    {
-        is_result_good = true;
-        gm.temp_correct.SetActive(is_result_good);
-        gm.temp_incorrect.SetActive(!is_result_good);
-    }
-
-    public void is_wrong_button()
-    {
-        is_result_good = false;
-        gm.temp_correct.SetActive(is_result_good);
-        gm.temp_incorrect.SetActive(!is_result_good);
     }
 }
