@@ -13,7 +13,6 @@ public class Astronauta : MonoBehaviour {
     public Sprite astronauta_recording;
     public Sprite astronauta_win;
     public Sprite[] bag_level;
-    int bag_index = 1;
     
     // Use this for initialization
     void Start ()
@@ -61,12 +60,9 @@ public class Astronauta : MonoBehaviour {
         GetComponent<SpriteRenderer>().sprite = astronauta_iddle;
     }
 
-    public void toggle_win()
+    public void toggle_win_and_update_bag(int index)
     {
-        bag.sprite = bag_level[bag_index];
-        bag_index++;
-        if (bag_index == 4)
-            bag_index = 0;
+        bag.sprite = bag_level[index];
 
         GetComponent<SpriteRenderer>().sprite = astronauta_win;
         score_image.SetActive(true);
