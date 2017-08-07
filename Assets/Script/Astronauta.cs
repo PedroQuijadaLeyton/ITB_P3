@@ -49,6 +49,14 @@ public class Astronauta : MonoBehaviour {
         //GetComponent<SpriteRenderer>().sprite = astronauta_iddle;
     }
 
+    public void toggle_speaking()
+    {
+        procesing_image.SetActive(true);
+        record_image.SetActive(false);
+        alert_image.SetActive(false);
+        //GetComponent<SpriteRenderer>().sprite = astronauta_iddle;
+    }
+
     public void toggle_iddle()
     {
         record_image.SetActive(false);

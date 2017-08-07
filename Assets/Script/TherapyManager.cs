@@ -27,8 +27,8 @@ public class TherapyManager : MonoBehaviour {
     };
 
     public Therapy_images[] therapy_images = {
-       new Therapy_images("cage", 0)
-       //new Therapy_images("cap", 0),
+       new Therapy_images("cage", 0),
+       new Therapy_images("cap", 0)
        //new Therapy_images("cat", 0),
        //new Therapy_images("dome", 0),
        //new Therapy_images("eye", 0),

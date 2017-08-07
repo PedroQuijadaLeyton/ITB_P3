@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ImageManager : MonoBehaviour {
     
-    float movement_speed = 100.0f;
+    float movement_speed = 60.0f;
     GameManager gm;
     bool is_moving = true;
 
@@ -42,7 +42,7 @@ public class ImageManager : MonoBehaviour {
         //DELETE IMAGE AND START THE OTHER - ANIMATION MAKE THE IMAGE SCALE = 0
         if(transform.GetChild(0).lossyScale.x == 0)
         {
-            gm.spawn_image_instance();
+            gm.spawn_therapy_instance();
             Destroy(gameObject);
         }
     }
@@ -53,18 +53,17 @@ public class ImageManager : MonoBehaviour {
         {
             gm.toggle_question();
         }
-        else if (other.tag == "start") //WHEN IT STARTS RECORDING
+        else if (other.tag == "cue_and_record") //WHEN IT PLAYING THE CUE AND RECORDING
         {
-            gm.show_recording_panel();
+            gm.play_cue_and_record();
         }
         else if (other.tag == "end") //ANALAZING PANEL
         {
-            stop_object();
-            gm.show_analyzing_panel(this);
+            gm.stop_record_and_analyze();
         }
         else if(other.tag == "destroy") //IMAGE IS DESTROYED AT THE END IF THE RESULT IS WRONG
         {
-            gm.spawn_image_instance();
+            gm.spawn_therapy_instance();
             Destroy(gameObject);
         }
     }
@@ -84,8 +83,14 @@ public class ImageManager : MonoBehaviour {
         }
     }
 
-    public void stop_object()
+    public void stop_therapy_image_movement()
     {
         GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+    }
+
+    public void continue_therapy_image_movement()
+    {
+        GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
+        GetComponent<Rigidbody2D>().AddForce(Vector2.left * movement_speed, ForceMode2D.Force);
     }
 }

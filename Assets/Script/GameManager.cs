@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
     
-    ImageManager current_imagen;
     Astronauta astronauta;
     TherapyManager therapy_manager;
 
@@ -31,13 +30,17 @@ public class GameManager : MonoBehaviour {
 
     public bool image_therapy_result = false;
 
+    public AudioSource speaker;
+
+    GameObject therapy_instance;
+
     // Use this for initialization
     void Start ()
     {
         astronauta = FindObjectOfType<Astronauta>();
         therapy_manager = GetComponent<TherapyManager>();
         set_up_level();
-        spawn_image_instance();
+        spawn_therapy_instance();
 	}
 	
     void set_up_level()
@@ -74,14 +77,32 @@ public class GameManager : MonoBehaviour {
         astronauta.toggle_question();
     }
 
-    public void show_recording_panel()
+    public void play_cue_and_record()
     {
+        if(therapy_images_to_go[0].image_instance.get_difficulty() == 0 || therapy_images_to_go[0].image_instance.get_difficulty() == 1)
+        {
+            StartCoroutine(play_cue_and_record_ienumerator());
+            therapy_instance.GetComponent<ImageManager>().stop_therapy_image_movement();
+        }
+        else
+        {
+            astronauta.toggle_recording();
+        }
+    }
+
+    IEnumerator play_cue_and_record_ienumerator()
+    {
+        astronauta.toggle_speaking();
+        yield return new WaitForSeconds(speaker.clip.length * 2);
+        speaker.Play();
+        yield return new WaitForSeconds(speaker.clip.length * 3);
+        therapy_instance.GetComponent<ImageManager>().continue_therapy_image_movement();
         astronauta.toggle_recording();
     }
 
-    public void show_analyzing_panel(ImageManager im)
+    public void stop_record_and_analyze()
     {
-        current_imagen = im;
+        therapy_instance.GetComponent<ImageManager>().stop_therapy_image_movement();
         //recording.SetActive(false);
         astronauta.toggle_procesing();
         analyzing.SetActive(true);
@@ -94,7 +115,7 @@ public class GameManager : MonoBehaviour {
         analyzing.SetActive(false);
         astronauta.toggle_iddle();
         //SEND IMAGE RESPONSE OF RESULT
-        current_imagen.set_result(image_therapy_result);
+        therapy_instance.GetComponent<ImageManager>().set_result(image_therapy_result);
         if(image_therapy_result) //IF CORRECT
         {
             astronauta.toggle_win_and_update_bag();
@@ -111,27 +132,35 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public void spawn_image_instance()
+    public void spawn_therapy_instance()
     {
         Debug.Log(therapy_images_to_go[0].image_instance.get_image_name());
-        GameObject image_reference = Instantiate(image);
-        image_reference.transform.position = spawning_point.position;
+        therapy_instance = Instantiate(image);
+        therapy_instance.transform.position = spawning_point.position;
 
+        //the image result is false at the beggining
         image_therapy_result = false;
         //set incorrect by default - image pass by --DEBUG
         temp_correct.SetActive(image_therapy_result);
         temp_incorrect.SetActive(!image_therapy_result);
         //set incorrect by default - image pass by --DEBUG
 
-        image_reference.GetComponent<ImageManager>().init(Resources.Load(therapy_images_to_go[0].image_instance.get_image_name(), typeof(Sprite)) as Sprite , string.Concat(therapy_images_to_go[0].image_instance.get_image_name(), ".", therapy_images_to_go[0].image_instance.get_difficulty().ToString()), this);
-        //Debug.Log(therapy_images_to_go[0].image_instance.get_image_name() as Sprite);
-        //ERASE
-        //therapy_images_to_go.Add(therapy_images_to_go[0]);
-        
-        //ERASE
+        //SETTING IMAGE
+        therapy_instance.GetComponent<ImageManager>().init(
+            Resources.Load("therapy_images/" + therapy_images_to_go[0].image_instance.get_image_name(), typeof(Sprite)) as Sprite,
+            string.Concat(therapy_images_to_go[0].image_instance.get_image_name(), ".", therapy_images_to_go[0].image_instance.get_difficulty().ToString())
+            , this
+        );
 
-        //if (images_therapy_index == (images_therapy.Length - 1))
-        //    images_therapy_index = 0;
+        //SETTING audio
+        //WHOLE CUE
+        if (therapy_images_to_go[0].image_instance.get_difficulty() == 0)
+            speaker.clip = Resources.Load("whole_word_cue/" + therapy_images_to_go[0].image_instance.get_image_name(), typeof(AudioClip)) as AudioClip;
+        //INITIAL CUE
+        if (therapy_images_to_go[0].image_instance.get_difficulty() == 1)
+            speaker.clip = Resources.Load("initial_phoneme_cue/i_N_" + therapy_images_to_go[0].image_instance.get_image_name(), typeof(AudioClip)) as AudioClip;
+
+        //Debug.Log(speaker.clip.length);
 
     }
 
