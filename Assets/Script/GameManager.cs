@@ -34,6 +34,9 @@ public class GameManager : MonoBehaviour {
 
     GameObject therapy_instance;
 
+    float timer_debug = 0;
+    bool start_timer_debug = false;
+
     // Use this for initialization
     void Start ()
     {
@@ -65,7 +68,10 @@ public class GameManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-
+        if(start_timer_debug)
+        {
+            Debug.Log(timer_debug += Time.deltaTime);
+        }
         //Debug.Log(timepo += Time.deltaTime);
         //11.5
         
@@ -79,15 +85,22 @@ public class GameManager : MonoBehaviour {
 
     public void play_cue_and_record()
     {
-        if(therapy_images_to_go[0].image_instance.get_difficulty() == 0 || therapy_images_to_go[0].image_instance.get_difficulty() == 1)
+        if (therapy_images_to_go[0].image_instance.get_difficulty() == 0 || therapy_images_to_go[0].image_instance.get_difficulty() == 1)
         {
             StartCoroutine(play_cue_and_record_ienumerator());
             therapy_instance.GetComponent<ImageManager>().stop_therapy_image_movement();
         }
         else
         {
-            astronauta.toggle_recording();
+            toggle_microphone_on();
         }
+    }
+
+    void toggle_microphone_on()
+    {
+        astronauta.toggle_recording();
+        start_timer_debug = true;
+        AudioRecorder.Instance.StartRecorder(0, 4f, string.Concat("Records/", therapy_images_to_go[0].image_instance.get_image_name(),".", therapy_images_to_go[0].image_instance.get_difficulty(), ".wav"));
     }
 
     IEnumerator play_cue_and_record_ienumerator()
@@ -97,11 +110,12 @@ public class GameManager : MonoBehaviour {
         speaker.Play();
         yield return new WaitForSeconds(speaker.clip.length * 3);
         therapy_instance.GetComponent<ImageManager>().continue_therapy_image_movement();
-        astronauta.toggle_recording();
+        toggle_microphone_on();
     }
 
     public void stop_record_and_analyze()
     {
+        start_timer_debug = false;
         therapy_instance.GetComponent<ImageManager>().stop_therapy_image_movement();
         //recording.SetActive(false);
         astronauta.toggle_procesing();
@@ -126,6 +140,8 @@ public class GameManager : MonoBehaviour {
         }
         else
         {
+            //FAIL increment attemp + 1
+            therapy_images_to_go[0].image_instance.image_instance_failure();
             //if incorrect, add to the end of the list
             therapy_images_to_go.Add(therapy_images_to_go[0]);
             therapy_images_to_go.Remove(therapy_images_to_go[0]);
